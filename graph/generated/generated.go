@@ -6,14 +6,15 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
-	gqlparser "github.com/vektah/gqlparser/v2"
-	"github.com/vektah/gqlparser/v2/ast"
 	"go-graphql/graph/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
+	gqlparser "github.com/vektah/gqlparser/v2"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -42,28 +43,41 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Dog struct {
-		ID        func(childComplexity int) int
-		IsGoodBoi func(childComplexity int) int
-		Name      func(childComplexity int) int
+	Art struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+		Type func(childComplexity int) int
+	}
+
+	Creator struct {
+		Age  func(childComplexity int) int
+		Arts func(childComplexity int) int
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	Mutation struct {
-		CreateDog func(childComplexity int, input *model.NewDog) int
+		CreateArt     func(childComplexity int, input *model.NewArt) int
+		CreateCreator func(childComplexity int, input *model.NewCreator) int
 	}
 
 	Query struct {
-		Dog  func(childComplexity int, id string) int
-		Dogs func(childComplexity int) int
+		Art      func(childComplexity int, id string) int
+		Arts     func(childComplexity int) int
+		Creator  func(childComplexity int, id string) int
+		Creators func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	CreateDog(ctx context.Context, input *model.NewDog) (*model.Dog, error)
+	CreateCreator(ctx context.Context, input *model.NewCreator) (*model.Creator, error)
+	CreateArt(ctx context.Context, input *model.NewArt) (*model.Art, error)
 }
 type QueryResolver interface {
-	Dog(ctx context.Context, id string) (*model.Dog, error)
-	Dogs(ctx context.Context) ([]*model.Dog, error)
+	Creator(ctx context.Context, id string) (*model.Creator, error)
+	Creators(ctx context.Context) ([]*model.Creator, error)
+	Art(ctx context.Context, id string) (*model.Art, error)
+	Arts(ctx context.Context) ([]*model.Art, error)
 }
 
 type executableSchema struct {
@@ -81,57 +95,116 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Dog._id":
-		if e.complexity.Dog.ID == nil {
+	case "Art.id":
+		if e.complexity.Art.ID == nil {
 			break
 		}
 
-		return e.complexity.Dog.ID(childComplexity), true
+		return e.complexity.Art.ID(childComplexity), true
 
-	case "Dog.isGoodBoi":
-		if e.complexity.Dog.IsGoodBoi == nil {
+	case "Art.name":
+		if e.complexity.Art.Name == nil {
 			break
 		}
 
-		return e.complexity.Dog.IsGoodBoi(childComplexity), true
+		return e.complexity.Art.Name(childComplexity), true
 
-	case "Dog.name":
-		if e.complexity.Dog.Name == nil {
+	case "Art.type":
+		if e.complexity.Art.Type == nil {
 			break
 		}
 
-		return e.complexity.Dog.Name(childComplexity), true
+		return e.complexity.Art.Type(childComplexity), true
 
-	case "Mutation.createDog":
-		if e.complexity.Mutation.CreateDog == nil {
+	case "Creator.age":
+		if e.complexity.Creator.Age == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createDog_args(context.TODO(), rawArgs)
+		return e.complexity.Creator.Age(childComplexity), true
+
+	case "Creator.arts":
+		if e.complexity.Creator.Arts == nil {
+			break
+		}
+
+		return e.complexity.Creator.Arts(childComplexity), true
+
+	case "Creator.id":
+		if e.complexity.Creator.ID == nil {
+			break
+		}
+
+		return e.complexity.Creator.ID(childComplexity), true
+
+	case "Creator.name":
+		if e.complexity.Creator.Name == nil {
+			break
+		}
+
+		return e.complexity.Creator.Name(childComplexity), true
+
+	case "Mutation.createArt":
+		if e.complexity.Mutation.CreateArt == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createArt_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateDog(childComplexity, args["input"].(*model.NewDog)), true
+		return e.complexity.Mutation.CreateArt(childComplexity, args["input"].(*model.NewArt)), true
 
-	case "Query.dog":
-		if e.complexity.Query.Dog == nil {
+	case "Mutation.createCreator":
+		if e.complexity.Mutation.CreateCreator == nil {
 			break
 		}
 
-		args, err := ec.field_Query_dog_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createCreator_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Dog(childComplexity, args["_id"].(string)), true
+		return e.complexity.Mutation.CreateCreator(childComplexity, args["input"].(*model.NewCreator)), true
 
-	case "Query.dogs":
-		if e.complexity.Query.Dogs == nil {
+	case "Query.art":
+		if e.complexity.Query.Art == nil {
 			break
 		}
 
-		return e.complexity.Query.Dogs(childComplexity), true
+		args, err := ec.field_Query_art_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Art(childComplexity, args["id"].(string)), true
+
+	case "Query.arts":
+		if e.complexity.Query.Arts == nil {
+			break
+		}
+
+		return e.complexity.Query.Arts(childComplexity), true
+
+	case "Query.Creator":
+		if e.complexity.Query.Creator == nil {
+			break
+		}
+
+		args, err := ec.field_Query_Creator_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Creator(childComplexity, args["id"].(string)), true
+
+	case "Query.Creators":
+		if e.complexity.Query.Creators == nil {
+			break
+		}
+
+		return e.complexity.Query.Creators(childComplexity), true
 
 	}
 	return 0, false
@@ -197,24 +270,46 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "graph/schema.graphqls", Input: `type Dog {
-  _id: String!
+	&ast.Source{Name: "graph/schema.graphqls", Input: `type Creator {
+  id: ID!
   name: String!
-  isGoodBoi: Boolean!
+  age: Int!
+  arts: [Art!]
+}
+
+type Art {
+  id: ID!
+  name: String!
+  type: TypeOf!
+}
+
+enum TypeOf {
+  SONG
+  FILM
+  PICTURE
 }
 
 type Query {
-  dog(_id: String!): Dog!
-  dogs: [Dog!]!
+  Creator(id: ID!): Creator!
+  Creators: [Creator!]!
+  art(id: ID!): Art!
+  arts: [Art!]!
 }
 
-input NewDog {
+input NewCreator {
   name: String!
-  isGoodBoi: Boolean!
+  age: Int!
+  arts: [NewArt!]
+}
+
+input NewArt {
+  name: String!
+  type: TypeOf!
 }
 
 type Mutation {
-  createDog(input: NewDog): Dog!
+  createCreator(input: NewCreator): Creator!
+  createArt(input: NewArt): Art!
 }
 `, BuiltIn: false},
 }
@@ -224,17 +319,45 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_createDog_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createArt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.NewDog
+	var arg0 *model.NewArt
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalONewDog2ᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐNewDog(ctx, tmp)
+		arg0, err = ec.unmarshalONewArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createCreator_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.NewCreator
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalONewCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewCreator(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_Creator_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -252,17 +375,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_dog_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_art_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["_id"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["_id"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -302,7 +425,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Dog__id(ctx context.Context, field graphql.CollectedField, obj *model.Dog) (ret graphql.Marshaler) {
+func (ec *executionContext) _Art_id(ctx context.Context, field graphql.CollectedField, obj *model.Art) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -310,7 +433,7 @@ func (ec *executionContext) _Dog__id(ctx context.Context, field graphql.Collecte
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Dog",
+		Object:   "Art",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -333,10 +456,10 @@ func (ec *executionContext) _Dog__id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Dog_name(ctx context.Context, field graphql.CollectedField, obj *model.Dog) (ret graphql.Marshaler) {
+func (ec *executionContext) _Art_name(ctx context.Context, field graphql.CollectedField, obj *model.Art) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -344,7 +467,7 @@ func (ec *executionContext) _Dog_name(ctx context.Context, field graphql.Collect
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Dog",
+		Object:   "Art",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -370,7 +493,7 @@ func (ec *executionContext) _Dog_name(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Dog_isGoodBoi(ctx context.Context, field graphql.CollectedField, obj *model.Dog) (ret graphql.Marshaler) {
+func (ec *executionContext) _Art_type(ctx context.Context, field graphql.CollectedField, obj *model.Art) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -378,7 +501,7 @@ func (ec *executionContext) _Dog_isGoodBoi(ctx context.Context, field graphql.Co
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Dog",
+		Object:   "Art",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -387,7 +510,7 @@ func (ec *executionContext) _Dog_isGoodBoi(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IsGoodBoi, nil
+		return obj.Type, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -399,12 +522,145 @@ func (ec *executionContext) _Dog_isGoodBoi(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(model.TypeOf)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNTypeOf2goᚑgraphqlᚋgraphᚋmodelᚐTypeOf(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createDog(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Creator_id(ctx context.Context, field graphql.CollectedField, obj *model.Creator) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Creator",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Creator_name(ctx context.Context, field graphql.CollectedField, obj *model.Creator) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Creator",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Creator_age(ctx context.Context, field graphql.CollectedField, obj *model.Creator) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Creator",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Age, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Creator_arts(ctx context.Context, field graphql.CollectedField, obj *model.Creator) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Creator",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Arts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Art)
+	fc.Result = res
+	return ec.marshalOArt2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐArtᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createCreator(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -420,7 +676,7 @@ func (ec *executionContext) _Mutation_createDog(ctx context.Context, field graph
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createDog_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createCreator_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -428,7 +684,7 @@ func (ec *executionContext) _Mutation_createDog(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateDog(rctx, args["input"].(*model.NewDog))
+		return ec.resolvers.Mutation().CreateCreator(rctx, args["input"].(*model.NewCreator))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -440,12 +696,53 @@ func (ec *executionContext) _Mutation_createDog(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Dog)
+	res := resTmp.(*model.Creator)
 	fc.Result = res
-	return ec.marshalNDog2ᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDog(ctx, field.Selections, res)
+	return ec.marshalNCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createArt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createArt_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateArt(rctx, args["input"].(*model.NewArt))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Art)
+	fc.Result = res
+	return ec.marshalNArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐArt(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_Creator(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -461,7 +758,7 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_dog_args(ctx, rawArgs)
+	args, err := ec.field_Query_Creator_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -469,7 +766,7 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Dog(rctx, args["_id"].(string))
+		return ec.resolvers.Query().Creator(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -481,12 +778,12 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Dog)
+	res := resTmp.(*model.Creator)
 	fc.Result = res
-	return ec.marshalNDog2ᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDog(ctx, field.Selections, res)
+	return ec.marshalNCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_dogs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_Creators(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -503,7 +800,7 @@ func (ec *executionContext) _Query_dogs(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Dogs(rctx)
+		return ec.resolvers.Query().Creators(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -515,9 +812,84 @@ func (ec *executionContext) _Query_dogs(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Dog)
+	res := resTmp.([]*model.Creator)
 	fc.Result = res
-	return ec.marshalNDog2ᚕᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDogᚄ(ctx, field.Selections, res)
+	return ec.marshalNCreator2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreatorᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_art(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_art_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Art(rctx, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Art)
+	fc.Result = res
+	return ec.marshalNArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐArt(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_arts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Arts(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Art)
+	fc.Result = res
+	return ec.marshalNArt2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐArtᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1644,8 +2016,8 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNewDog(ctx context.Context, obj interface{}) (model.NewDog, error) {
-	var it model.NewDog
+func (ec *executionContext) unmarshalInputNewArt(ctx context.Context, obj interface{}) (model.NewArt, error) {
+	var it model.NewArt
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -1656,9 +2028,39 @@ func (ec *executionContext) unmarshalInputNewDog(ctx context.Context, obj interf
 			if err != nil {
 				return it, err
 			}
-		case "isGoodBoi":
+		case "type":
 			var err error
-			it.IsGoodBoi, err = ec.unmarshalNBoolean2bool(ctx, v)
+			it.Type, err = ec.unmarshalNTypeOf2goᚑgraphqlᚋgraphᚋmodelᚐTypeOf(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewCreator(ctx context.Context, obj interface{}) (model.NewCreator, error) {
+	var it model.NewCreator
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "age":
+			var err error
+			it.Age, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "arts":
+			var err error
+			it.Arts, err = ec.unmarshalONewArt2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewArtᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -1676,32 +2078,71 @@ func (ec *executionContext) unmarshalInputNewDog(ctx context.Context, obj interf
 
 // region    **************************** object.gotpl ****************************
 
-var dogImplementors = []string{"Dog"}
+var artImplementors = []string{"Art"}
 
-func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *model.Dog) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, dogImplementors)
+func (ec *executionContext) _Art(ctx context.Context, sel ast.SelectionSet, obj *model.Art) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Dog")
-		case "_id":
-			out.Values[i] = ec._Dog__id(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("Art")
+		case "id":
+			out.Values[i] = ec._Art_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
-			out.Values[i] = ec._Dog_name(ctx, field, obj)
+			out.Values[i] = ec._Art_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "isGoodBoi":
-			out.Values[i] = ec._Dog_isGoodBoi(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec._Art_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var creatorImplementors = []string{"Creator"}
+
+func (ec *executionContext) _Creator(ctx context.Context, sel ast.SelectionSet, obj *model.Creator) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, creatorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Creator")
+		case "id":
+			out.Values[i] = ec._Creator_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Creator_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "age":
+			out.Values[i] = ec._Creator_age(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "arts":
+			out.Values[i] = ec._Creator_arts(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1728,8 +2169,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createDog":
-			out.Values[i] = ec._Mutation_createDog(ctx, field)
+		case "createCreator":
+			out.Values[i] = ec._Mutation_createCreator(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createArt":
+			out.Values[i] = ec._Mutation_createArt(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1759,7 +2205,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "dog":
+		case "Creator":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1767,13 +2213,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_dog(ctx, field)
+				res = ec._Query_Creator(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "dogs":
+		case "Creators":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1781,7 +2227,35 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_dogs(ctx, field)
+				res = ec._Query_Creators(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "art":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_art(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "arts":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_arts(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2047,25 +2521,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
-	return graphql.UnmarshalBoolean(v)
+func (ec *executionContext) marshalNArt2goᚑgraphqlᚋgraphᚋmodelᚐArt(ctx context.Context, sel ast.SelectionSet, v model.Art) graphql.Marshaler {
+	return ec._Art(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-	res := graphql.MarshalBoolean(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalNDog2githubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDog(ctx context.Context, sel ast.SelectionSet, v model.Dog) graphql.Marshaler {
-	return ec._Dog(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDog2ᚕᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDogᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Dog) graphql.Marshaler {
+func (ec *executionContext) marshalNArt2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐArtᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Art) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2089,7 +2549,7 @@ func (ec *executionContext) marshalNDog2ᚕᚖgithubᚗcomᚋHᚑRichardᚋgoᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDog2ᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDog(ctx, sel, v[i])
+			ret[i] = ec.marshalNArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐArt(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2102,14 +2562,119 @@ func (ec *executionContext) marshalNDog2ᚕᚖgithubᚗcomᚋHᚑRichardᚋgoᚑ
 	return ret
 }
 
-func (ec *executionContext) marshalNDog2ᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐDog(ctx context.Context, sel ast.SelectionSet, v *model.Dog) graphql.Marshaler {
+func (ec *executionContext) marshalNArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐArt(ctx context.Context, sel ast.SelectionSet, v *model.Art) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._Dog(ctx, sel, v)
+	return ec._Art(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
+	return graphql.UnmarshalBoolean(v)
+}
+
+func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	res := graphql.MarshalBoolean(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNCreator2goᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx context.Context, sel ast.SelectionSet, v model.Creator) graphql.Marshaler {
+	return ec._Creator(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCreator2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Creator) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx context.Context, sel ast.SelectionSet, v *model.Creator) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Creator(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalID(v)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNNewArt2goᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx context.Context, v interface{}) (model.NewArt, error) {
+	return ec.unmarshalInputNewArt(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx context.Context, v interface{}) (*model.NewArt, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNNewArt2goᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2124,6 +2689,15 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNTypeOf2goᚑgraphqlᚋgraphᚋmodelᚐTypeOf(ctx context.Context, v interface{}) (model.TypeOf, error) {
+	var res model.TypeOf
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNTypeOf2goᚑgraphqlᚋgraphᚋmodelᚐTypeOf(ctx context.Context, sel ast.SelectionSet, v model.TypeOf) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2352,6 +2926,46 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) marshalOArt2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐArtᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Art) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐArt(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -2375,15 +2989,47 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalONewDog2githubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐNewDog(ctx context.Context, v interface{}) (model.NewDog, error) {
-	return ec.unmarshalInputNewDog(ctx, v)
+func (ec *executionContext) unmarshalONewArt2goᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx context.Context, v interface{}) (model.NewArt, error) {
+	return ec.unmarshalInputNewArt(ctx, v)
 }
 
-func (ec *executionContext) unmarshalONewDog2ᚖgithubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐNewDog(ctx context.Context, v interface{}) (*model.NewDog, error) {
+func (ec *executionContext) unmarshalONewArt2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewArtᚄ(ctx context.Context, v interface{}) ([]*model.NewArt, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*model.NewArt, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNNewArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalONewArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx context.Context, v interface{}) (*model.NewArt, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalONewDog2githubᚗcomᚋHᚑRichardᚋgoᚑgraphqlᚋgraphᚋmodelᚐNewDog(ctx, v)
+	res, err := ec.unmarshalONewArt2goᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalONewCreator2goᚑgraphqlᚋgraphᚋmodelᚐNewCreator(ctx context.Context, v interface{}) (model.NewCreator, error) {
+	return ec.unmarshalInputNewCreator(ctx, v)
+}
+
+func (ec *executionContext) unmarshalONewCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐNewCreator(ctx context.Context, v interface{}) (*model.NewCreator, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalONewCreator2goᚑgraphqlᚋgraphᚋmodelᚐNewCreator(ctx, v)
 	return &res, err
 }
 

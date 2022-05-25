@@ -1,19 +1,41 @@
-type Dog {
-  _id: String!
+type Creator {
+  id: ID!
   name: String!
-  isGoodBoi: Boolean!
+  age: Int!
+  arts: [Art!]
+}
+
+type Art {
+  id: ID!
+  name: String!
+  type: TypeOf!
+}
+
+enum TypeOf {
+  SONG
+  FILM
+  PICTURE
 }
 
 type Query {
-  dog(_id: String!): Dog!
-  dogs: [Dog!]!
+  Creator(id: ID!): Creator!
+  Creators: [Creator!]!
+  art(id: ID!): Art!
+  arts: [Art!]!
 }
 
-input NewDog {
+input NewCreator {
   name: String!
-  isGoodBoi: Boolean!
+  age: Int!
+  arts: [NewArt!]
+}
+
+input NewArt {
+  name: String!
+  type: TypeOf!
 }
 
 type Mutation {
-  createDog(input: NewDog): Dog!
+  createCreator(input: NewCreator): Creator!
+  createArt(input: NewArt): Art!
 }

@@ -2,13 +2,75 @@
 
 package model
 
-type Dog struct {
-	ID        string `json:"_id" bson:"_id"`
-	Name      string `json:"name"`
-	IsGoodBoi bool   `json:"isGoodBoi"`
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type Art struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Type TypeOf `json:"type"`
 }
 
-type NewDog struct {
-	Name      string `json:"name"`
-	IsGoodBoi bool   `json:"isGoodBoi"`
+type Creator struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+	Arts []*Art `json:"arts"`
+}
+
+type NewArt struct {
+	Name string `json:"name"`
+	Type TypeOf `json:"type"`
+}
+
+type NewCreator struct {
+	Name string    `json:"name"`
+	Age  int       `json:"age"`
+	Arts []*NewArt `json:"arts"`
+}
+
+type TypeOf string
+
+const (
+	TypeOfSong    TypeOf = "SONG"
+	TypeOfFilm    TypeOf = "FILM"
+	TypeOfPicture TypeOf = "PICTURE"
+)
+
+var AllTypeOf = []TypeOf{
+	TypeOfSong,
+	TypeOfFilm,
+	TypeOfPicture,
+}
+
+func (e TypeOf) IsValid() bool {
+	switch e {
+	case TypeOfSong, TypeOfFilm, TypeOfPicture:
+		return true
+	}
+	return false
+}
+
+func (e TypeOf) String() string {
+	return string(e)
+}
+
+func (e *TypeOf) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TypeOf(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TypeOf", str)
+	}
+	return nil
+}
+
+func (e TypeOf) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
