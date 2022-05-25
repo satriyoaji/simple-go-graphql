@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"go-graphql/graph"
+	"go-graphql/graph/generated"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/H-Richard/go-graphql/graph"
-	"github.com/H-Richard/go-graphql/graph/generated"
 )
 
 const defaultPort = "8080"

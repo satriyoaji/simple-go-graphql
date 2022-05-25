@@ -5,10 +5,9 @@ package graph
 
 import (
 	"context"
-
-	"github.com/H-Richard/go-graphql/database"
-	"github.com/H-Richard/go-graphql/graph/generated"
-	"github.com/H-Richard/go-graphql/graph/model"
+	"go-graphql/database"
+	"go-graphql/graph/generated"
+	"go-graphql/graph/model"
 )
 
 var db = database.Connect()
