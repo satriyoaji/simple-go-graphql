@@ -9,6 +9,7 @@ type Art {
   id: ID!
   name: String!
   type: TypeOf!
+  creator: Creator
 }
 
 enum TypeOf {
@@ -18,9 +19,9 @@ enum TypeOf {
 }
 
 type Query {
-  Creator(id: ID!): Creator!
-  Creators: [Creator!]!
-  art(id: ID!): Art!
+  creatorById(id: ID!): Creator!
+  creators: [Creator!]!
+  artById(id: ID!): Art!
   arts: [Art!]!
 }
 
@@ -33,6 +34,7 @@ input NewCreator {
 input NewArt {
   name: String!
   type: TypeOf!
+  creatorId: ID!
 }
 
 type Mutation {

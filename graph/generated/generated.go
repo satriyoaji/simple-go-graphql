@@ -44,9 +44,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Art struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-		Type func(childComplexity int) int
+		Creator func(childComplexity int) int
+		ID      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Type    func(childComplexity int) int
 	}
 
 	Creator struct {
@@ -62,10 +63,10 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Art      func(childComplexity int, id string) int
-		Arts     func(childComplexity int) int
-		Creator  func(childComplexity int, id string) int
-		Creators func(childComplexity int) int
+		ArtByID     func(childComplexity int, id string) int
+		Arts        func(childComplexity int) int
+		CreatorByID func(childComplexity int, id string) int
+		Creators    func(childComplexity int) int
 	}
 }
 
@@ -74,9 +75,9 @@ type MutationResolver interface {
 	CreateArt(ctx context.Context, input *model.NewArt) (*model.Art, error)
 }
 type QueryResolver interface {
-	Creator(ctx context.Context, id string) (*model.Creator, error)
+	CreatorByID(ctx context.Context, id string) (*model.Creator, error)
 	Creators(ctx context.Context) ([]*model.Creator, error)
-	Art(ctx context.Context, id string) (*model.Art, error)
+	ArtByID(ctx context.Context, id string) (*model.Art, error)
 	Arts(ctx context.Context) ([]*model.Art, error)
 }
 
@@ -94,6 +95,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Art.creator":
+		if e.complexity.Art.Creator == nil {
+			break
+		}
+
+		return e.complexity.Art.Creator(childComplexity), true
 
 	case "Art.id":
 		if e.complexity.Art.ID == nil {
@@ -168,17 +176,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateCreator(childComplexity, args["input"].(*model.NewCreator)), true
 
-	case "Query.art":
-		if e.complexity.Query.Art == nil {
+	case "Query.artById":
+		if e.complexity.Query.ArtByID == nil {
 			break
 		}
 
-		args, err := ec.field_Query_art_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_artById_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Art(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.ArtByID(childComplexity, args["id"].(string)), true
 
 	case "Query.arts":
 		if e.complexity.Query.Arts == nil {
@@ -187,19 +195,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Arts(childComplexity), true
 
-	case "Query.Creator":
-		if e.complexity.Query.Creator == nil {
+	case "Query.creatorById":
+		if e.complexity.Query.CreatorByID == nil {
 			break
 		}
 
-		args, err := ec.field_Query_Creator_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_creatorById_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Creator(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.CreatorByID(childComplexity, args["id"].(string)), true
 
-	case "Query.Creators":
+	case "Query.creators":
 		if e.complexity.Query.Creators == nil {
 			break
 		}
@@ -281,6 +289,7 @@ type Art {
   id: ID!
   name: String!
   type: TypeOf!
+  creator: Creator
 }
 
 enum TypeOf {
@@ -290,9 +299,9 @@ enum TypeOf {
 }
 
 type Query {
-  Creator(id: ID!): Creator!
-  Creators: [Creator!]!
-  art(id: ID!): Art!
+  creatorById(id: ID!): Creator!
+  creators: [Creator!]!
+  artById(id: ID!): Art!
   arts: [Art!]!
 }
 
@@ -305,6 +314,7 @@ input NewCreator {
 input NewArt {
   name: String!
   type: TypeOf!
+  creatorId: ID!
 }
 
 type Mutation {
@@ -347,20 +357,6 @@ func (ec *executionContext) field_Mutation_createCreator_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_Creator_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -375,7 +371,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_art_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_artById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_creatorById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -525,6 +535,37 @@ func (ec *executionContext) _Art_type(ctx context.Context, field graphql.Collect
 	res := resTmp.(model.TypeOf)
 	fc.Result = res
 	return ec.marshalNTypeOf2goᚑgraphqlᚋgraphᚋmodelᚐTypeOf(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Art_creator(ctx context.Context, field graphql.CollectedField, obj *model.Art) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Art",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Creator, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Creator)
+	fc.Result = res
+	return ec.marshalOCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Creator_id(ctx context.Context, field graphql.CollectedField, obj *model.Creator) (ret graphql.Marshaler) {
@@ -742,7 +783,7 @@ func (ec *executionContext) _Mutation_createArt(ctx context.Context, field graph
 	return ec.marshalNArt2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐArt(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_Creator(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_creatorById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -758,7 +799,7 @@ func (ec *executionContext) _Query_Creator(ctx context.Context, field graphql.Co
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_Creator_args(ctx, rawArgs)
+	args, err := ec.field_Query_creatorById_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -766,7 +807,7 @@ func (ec *executionContext) _Query_Creator(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Creator(rctx, args["id"].(string))
+		return ec.resolvers.Query().CreatorByID(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -783,7 +824,7 @@ func (ec *executionContext) _Query_Creator(ctx context.Context, field graphql.Co
 	return ec.marshalNCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_Creators(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_creators(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -817,7 +858,7 @@ func (ec *executionContext) _Query_Creators(ctx context.Context, field graphql.C
 	return ec.marshalNCreator2ᚕᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreatorᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_art(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_artById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -833,7 +874,7 @@ func (ec *executionContext) _Query_art(ctx context.Context, field graphql.Collec
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_art_args(ctx, rawArgs)
+	args, err := ec.field_Query_artById_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -841,7 +882,7 @@ func (ec *executionContext) _Query_art(ctx context.Context, field graphql.Collec
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Art(rctx, args["id"].(string))
+		return ec.resolvers.Query().ArtByID(rctx, args["id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2034,6 +2075,12 @@ func (ec *executionContext) unmarshalInputNewArt(ctx context.Context, obj interf
 			if err != nil {
 				return it, err
 			}
+		case "creatorId":
+			var err error
+			it.CreatorID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -2104,6 +2151,8 @@ func (ec *executionContext) _Art(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "creator":
+			out.Values[i] = ec._Art_creator(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2205,7 +2254,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "Creator":
+		case "creatorById":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2213,13 +2262,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_Creator(ctx, field)
+				res = ec._Query_creatorById(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "Creators":
+		case "creators":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2227,13 +2276,13 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_Creators(ctx, field)
+				res = ec._Query_creators(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "art":
+		case "artById":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2241,7 +2290,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_art(ctx, field)
+				res = ec._Query_artById(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2987,6 +3036,17 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOCreator2goᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx context.Context, sel ast.SelectionSet, v model.Creator) graphql.Marshaler {
+	return ec._Creator(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOCreator2ᚖgoᚑgraphqlᚋgraphᚋmodelᚐCreator(ctx context.Context, sel ast.SelectionSet, v *model.Creator) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Creator(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalONewArt2goᚑgraphqlᚋgraphᚋmodelᚐNewArt(ctx context.Context, v interface{}) (model.NewArt, error) {

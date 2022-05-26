@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/H-Richard/go-graphql v0.0.0-20200803040648-62a903a633a7 // indirect
 	github.com/agnivade/levenshtein v1.0.3 // indirect
 	github.com/aws/aws-sdk-go v1.29.15 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect

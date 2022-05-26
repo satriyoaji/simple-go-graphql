@@ -5,36 +5,33 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"go-graphql/database"
 	"go-graphql/graph/generated"
 	"go-graphql/graph/model"
 )
 
-var db = database.Connect()
-
 func (r *mutationResolver) CreateCreator(ctx context.Context, input *model.NewCreator) (*model.Creator, error) {
-	panic(fmt.Errorf("not implemented"))
+	return db.SaveCreator(input), nil
 }
 
 func (r *mutationResolver) CreateArt(ctx context.Context, input *model.NewArt) (*model.Art, error) {
-	panic(fmt.Errorf("not implemented"))
+	return db.SaveArt(input), nil
 }
 
-func (r *queryResolver) Creator(ctx context.Context, id string) (*model.Creator, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) CreatorByID(ctx context.Context, id string) (*model.Creator, error) {
+	return db.FindCreatorByID(id), nil
 }
 
 func (r *queryResolver) Creators(ctx context.Context) ([]*model.Creator, error) {
-	panic(fmt.Errorf("not implemented"))
+	return db.FindAllCreators(), nil
 }
 
-func (r *queryResolver) Art(ctx context.Context, id string) (*model.Art, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) ArtByID(ctx context.Context, id string) (*model.Art, error) {
+	return db.FindArtByID(id), nil
 }
 
 func (r *queryResolver) Arts(ctx context.Context) ([]*model.Art, error) {
-	panic(fmt.Errorf("not implemented"))
+	return db.FindAllArts(), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -52,13 +49,4 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-
-//func (r *mutationResolver) CreateDog(ctx context.Context, input *model.NewDog) (*model.Dog, error) {
-//	return db.Save(input), nil
-//}
-//func (r *queryResolver) Dog(ctx context.Context, id string) (*model.Dog, error) {
-//	return db.FindByID(id), nil
-//}
-//func (r *queryResolver) Dogs(ctx context.Context) ([]*model.Dog, error) {
-//	return db.All(), nil
-//}
+var db = database.Connect()

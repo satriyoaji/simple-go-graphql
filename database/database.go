@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"go-graphql/graph/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,51 +29,123 @@ func Connect() *DB {
 	}
 }
 
-func (db *DB) Save(input *model.NewDog) *model.Dog {
-	collection := db.client.Database("animals").Collection("dogs")
+func (db *DB) SaveCreator(inputCreator *model.NewCreator) *model.Creator {
+	collection := db.client.Database("graphql_art").Collection("creators")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	res, err := collection.InsertOne(ctx, input)
+	res, err := collection.InsertOne(ctx, inputCreator)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &model.Dog{
-		ID:        res.InsertedID.(primitive.ObjectID).Hex(),
-		Name:      input.Name,
-		IsGoodBoi: input.IsGoodBoi,
+
+	return &model.Creator{
+		ID:   res.InsertedID.(primitive.ObjectID).Hex(),
+		Name: inputCreator.Name,
+		Age:  inputCreator.Age,
+		//Arts: 		inputCreator.Arts,
 	}
 }
 
-func (db *DB) FindByID(ID string) *model.Dog {
+func (db *DB) SaveArt(inputArt *model.NewArt) *model.Art {
+	collection := db.client.Database("graphql_art").Collection("arts")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	res, err := collection.InsertOne(ctx, inputArt)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	creator := db.FindCreatorByID(inputArt.CreatorID)
+	return &model.Art{
+		ID:      res.InsertedID.(primitive.ObjectID).Hex(),
+		Name:    inputArt.Name,
+		Type:    inputArt.Type,
+		Creator: creator,
+	}
+}
+
+func (db *DB) FindCreatorByID(ID string) *model.Creator {
 	ObjectID, err := primitive.ObjectIDFromHex(ID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := db.client.Database("animals").Collection("dogs")
+	collection := db.client.Database("graphql_art").Collection("creators")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res := collection.FindOne(ctx, bson.M{"_id": ObjectID})
-	dog := model.Dog{}
-	res.Decode(&dog)
-	return &dog
+	creator := model.Creator{}
+	err = res.Decode(&creator)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(creator)
+	return &creator
 }
 
-func (db *DB) All() []*model.Dog {
-	collection := db.client.Database("animals").Collection("dogs")
+func (db *DB) FindArtByID(ID string) *model.Art {
+	ObjectID, err := primitive.ObjectIDFromHex(ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	collection := db.client.Database("graphql_art").Collection("arts")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	res := collection.FindOne(ctx, bson.M{"_id": ObjectID})
+	//fmt.Println(res.DecodeBytes())
+
+	artDecoded := model.ArtDecoded{}
+	err = res.Decode(&artDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	creator := db.FindCreatorByID(artDecoded.CreatorId)
+	art := model.Art{artDecoded.ID, artDecoded.Name, artDecoded.Type, creator}
+
+	return &art
+}
+
+func (db *DB) FindAllCreators() []*model.Creator {
+	collection := db.client.Database("graphql_art").Collection("creators")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	var dogs []*model.Dog
+	var creators []*model.Creator
 	for cur.Next(ctx) {
-		var dog *model.Dog
-		err := cur.Decode(&dog)
+		var creator *model.Creator
+		err := cur.Decode(&creator)
 		if err != nil {
 			log.Fatal(err)
 		}
-		dogs = append(dogs, dog)
+		fmt.Println(creator.ID)
+		creators = append(creators, creator)
 	}
-	return dogs
+	return creators
+}
+
+func (db *DB) FindAllArts() []*model.Art {
+	collection := db.client.Database("graphql_art").Collection("arts")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var arts []*model.Art
+	for cur.Next(ctx) {
+		artDecoded := model.ArtDecoded{}
+		err := cur.Decode(&artDecoded)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		creator := db.FindCreatorByID(artDecoded.CreatorId)
+		art := model.Art{artDecoded.ID, artDecoded.Name, artDecoded.Type, creator}
+
+		arts = append(arts, &art)
+	}
+	return arts
 }

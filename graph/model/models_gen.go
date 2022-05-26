@@ -9,9 +9,10 @@ import (
 )
 
 type Art struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Type TypeOf `json:"type"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Type    TypeOf   `json:"type"`
+	Creator *Creator `json:"creator"`
 }
 
 type Creator struct {
@@ -22,8 +23,9 @@ type Creator struct {
 }
 
 type NewArt struct {
-	Name string `json:"name"`
-	Type TypeOf `json:"type"`
+	Name      string `json:"name"`
+	Type      TypeOf `json:"type"`
+	CreatorID string `json:"creatorId"`
 }
 
 type NewCreator struct {
