@@ -42,7 +42,7 @@ func (db *DB) SaveCreator(inputCreator *model.NewCreator) *model.Creator {
 		ID:   res.InsertedID.(primitive.ObjectID).Hex(),
 		Name: inputCreator.Name,
 		Age:  inputCreator.Age,
-		//Arts: 		inputCreator.Arts,
+		//Arts:	arts,
 	}
 }
 
@@ -70,7 +70,8 @@ func (db *DB) FindCreatorByID(ID string) *model.Creator {
 		log.Fatal(err)
 	}
 	collection := db.client.Database("graphql_art").Collection("creators")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	res := collection.FindOne(ctx, bson.M{"_id": ObjectID})
 	creator := model.Creator{}
@@ -79,6 +80,11 @@ func (db *DB) FindCreatorByID(ID string) *model.Creator {
 		log.Fatal(err)
 	}
 	fmt.Println(creator)
+
+	arts := db.FindArtsByCreatorID(ctx, ID)
+	creator.Arts = arts
+	fmt.Println(arts)
+
 	return &creator
 }
 
@@ -103,6 +109,32 @@ func (db *DB) FindArtByID(ID string) *model.Art {
 	art := model.Art{artDecoded.ID, artDecoded.Name, artDecoded.Type, creator}
 
 	return &art
+}
+
+func (db *DB) FindArtsByCreatorID(ctx context.Context, CreatorID string) []*model.Art {
+	collection := db.client.Database("graphql_art").Collection("arts")
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	res, err := collection.Find(ctx, bson.M{"creatorid": CreatorID})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var arts []*model.Art
+	for res.Next(ctx) {
+		artDecoded := model.ArtDecoded{}
+		err := res.Decode(&artDecoded)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(artDecoded)
+		creator := db.FindCreatorByID(artDecoded.CreatorId)
+		art := model.Art{artDecoded.ID, artDecoded.Name, artDecoded.Type, creator}
+
+		arts = append(arts, &art)
+	}
+
+	return arts
 }
 
 func (db *DB) FindAllCreators() []*model.Creator {
